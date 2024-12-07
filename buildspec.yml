@@ -24,9 +24,10 @@ phases:
       - echo Pushing the Docker image...
       - docker push $REPOSITORY_URI:$IMAGE_TAG
       - echo Writing image definitions file...
-      - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:$IMAGE_TAG > imageDefinitions.json
+      - printf '[{"name":"akash-container","imageUri":"%s"}]' $REPOSITORY_URI:$IMAGE_TAG > imageDefinitions.json
+      - cat imageDefinitions.json
 
 artifacts:
-  files: 
+  files:
     - imageDefinitions.json
   discard-paths: yes
