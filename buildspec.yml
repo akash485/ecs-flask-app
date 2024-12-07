@@ -7,33 +7,19 @@ phases:
   
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin $ECR_REPOSITORY_URI
-      - REPOSITORY_URI=$ECR_REPOSITORY_URI
-      - IMAGE_TAG=${CODEBUILD_BUILD_NUMBER}
+      - IMAGE_TAG=$CODEBUILD_BUILD_NUMBER
   
   build:
     commands:
-      - echo Build started on `date`
-      - echo Building the Docker image...
-      - docker build -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker build -t $ECR_REPOSITORY_URI:$IMAGE_TAG .
   
   post_build:
     commands:
-      - echo Build completed on `date`
-      - echo Pushing the Docker image...
-      - docker push $REPOSITORY_URI:$IMAGE_TAG
-      - echo Writing image definitions file...
-      - |
-        echo '[
-          {
-            "name": "akash-container",
-            "imageUri": "'${REPOSITORY_URI}':'${IMAGE_TAG}'"
-          }
-        ]' > imageDefinitions.json
+      - docker push $ECR_REPOSITORY_URI:$IMAGE_TAG
+      - echo '[{"name":"akash-container","imageUri":"'$ECR_REPOSITORY_URI':'$IMAGE_TAG'"}]' > imageDefinitions.json
       - cat imageDefinitions.json
 
 artifacts:
   files:
     - imageDefinitions.json
-  discard-paths: yes
